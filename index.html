@@ -1,581 +1,494 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-full">
+<html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Hora Extra</title>
+    <title>Controle de Hora Extra - Login & Ponto</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter & JetBrains Mono -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-    
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
                     colors: {
-                        theme: {
-                            bg: '#0c0e29',
-                            card: '#161942',
-                            cardHover: '#1d2154',
-                            border: '#2a2f6c',
-                            accent: '#6366f1',
-                            glow: '#818cf8'
+                        brand: {
+                            50: '#f0f4ff',
+                            100: '#e0e8ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#1e1b4b',
+                            dark: '#0f172a',
+                            card: '#1e293b'
                         }
                     }
                 }
             }
         }
     </script>
-    <style>
-        body {
-            background: linear-gradient(135deg, #090a1f 0%, #111438 50%, #0d0f2b 100%);
-            background-attachment: fixed;
-        }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0c0e29;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #2a2f6c;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #43499d;
-        }
-    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="h-full font-sans text-slate-100 antialiased flex flex-col selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col justify-between">
 
-    <header class="border-b border-theme-border/60 bg-theme-bg/80 backdrop-blur-md sticky top-0 z-30">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="p-2.5 bg-indigo-600/30 border border-indigo-500/40 rounded-xl text-indigo-400 shadow-lg shadow-indigo-900/30">
-                    <i class="fa-solid fa-clock text-xl"></i>
+    <!-- SEÇÃO 1: TELA DE LOGIN / CADASTRO -->
+    <div id="authScreen" class="min-h-screen flex items-center justify-center px-4 py-12">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl">
+            <!-- Header Auth -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600/20 text-indigo-400 rounded-full mb-4 border border-indigo-500/30">
+                    <i class="fa-solid fa-business-time text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white">Controle de Horas Extras</h2>
+                <p class="text-slate-400 text-sm mt-1">Acesse sua conta para registrar suas horas</p>
+            </div>
+
+            <!-- Tabs Login/Cadastro -->
+            <div class="flex border-b border-slate-800 mb-6">
+                <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 py-2 text-center text-sm font-semibold border-b-2 border-indigo-500 text-indigo-400">Entrar</button>
+                <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-2 text-center text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200">Criar Conta</button>
+            </div>
+
+            <!-- Form de Login -->
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">E-mail</label>
+                    <input type="email" id="loginEmail" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="seu@email.com">
                 </div>
                 <div>
-                    <h1 class="text-lg font-extrabold tracking-tight text-white flex items-center gap-2">
-                        Ponto Hora Extra
-                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold uppercase">Exclusivo</span>
-                    </h1>
-                    <p class="text-xs text-slate-400">Entrada & Saída • Contabilização Automática</p>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Senha</label>
+                    <input type="password" id="loginPassword" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="••••••••">
                 </div>
-            </div>
-            
-            <div class="flex items-center space-x-3">
-                <button id="btnExportCSV" class="px-3.5 py-1.5 bg-theme-card hover:bg-theme-cardHover border border-theme-border text-slate-300 text-xs font-semibold rounded-xl transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-file-csv text-emerald-400"></i>
-                    <span class="hidden sm:inline">Exportar CSV</span>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg shadow-lg shadow-indigo-600/30 transition-all duration-200 mt-2">
+                    Entrar no Sistema
                 </button>
-                <button id="btnClearAll" class="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-semibold rounded-xl transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-trash-can"></i>
-                    <span class="hidden sm:inline">Limpar</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
-
-        <!-- Relógio & Cards Totais -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <!-- Relógio Digital -->
-            <div class="bg-theme-card border border-theme-border rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden shadow-xl">
-                <div class="flex justify-between items-center text-xs text-slate-400 font-medium">
-                    <span id="currentDate">--/--/----</span>
-                    <span class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        AO VIVO
-                    </span>
-                </div>
-                <div class="my-3 text-center">
-                    <div id="digitalClock" class="text-4xl font-mono font-bold tracking-wider text-white drop-shadow-[0_0_15px_rgba(129,140,248,0.3)]">
-                        00:00:00
-                    </div>
-                </div>
-                <div class="text-[11px] text-slate-400 text-center border-t border-theme-border/50 pt-2">
-                    Horário Oficial Local
-                </div>
-            </div>
-
-            <!-- Card Total de HE Acumulado -->
-            <div class="bg-theme-card border border-theme-border rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden shadow-xl">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">Total de Hora Extra</span>
-                        <h2 id="cardTotalHE" class="text-3xl font-black text-emerald-400 mt-1 font-mono">00h 00m</h2>
-                    </div>
-                    <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl">
-                        <i class="fa-solid fa-hourglass-half text-xl"></i>
-                    </div>
-                </div>
-                <div class="text-[11px] text-slate-400 border-t border-theme-border/50 pt-2 flex justify-between">
-                    <span>Soma total realizada</span>
-                    <span id="badgeMonthTotal" class="text-indigo-300 font-medium">0 sessões</span>
-                </div>
-            </div>
-
-            <!-- Status do Dia -->
-            <div class="bg-theme-card border border-theme-border rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden shadow-xl">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">Status Atual</span>
-                        <h2 id="cardStatusText" class="text-xl font-bold text-slate-300 mt-1">Fora de Hora Extra</h2>
-                    </div>
-                    <div id="statusIconBox" class="p-3 bg-slate-800 border border-slate-700 text-slate-400 rounded-xl">
-                        <i id="statusIcon" class="fa-solid fa-power-off text-xl"></i>
-                    </div>
-                </div>
-                <div class="text-[11px] text-slate-400 border-t border-theme-border/50 pt-2 flex justify-between">
-                    <span>Horário Início:</span>
-                    <span id="labelHoraInicioAtiva" class="font-bold text-white font-mono">--:--</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Painel Estilo Imagem Enviada: Apenas 2 botões (ENTRADA e SAÍDA) -->
-        <section class="bg-theme-card border border-theme-border rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
-            <div class="text-center max-w-lg mx-auto mb-6">
-                <h2 class="text-lg font-bold text-white tracking-wide">REGISTRO DE HORA EXTRA</h2>
-                <p class="text-xs text-slate-400 mt-1">Clique no botão para registrar o horário atual de Entrada ou Saída</p>
-            </div>
-
-            <!-- Grid com 2 Campos/Botões (Entrada e Saída) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
-                
-                <!-- CARD 1: ENTRADA -->
-                <div id="boxEntrada" class="bg-theme-bg/90 border-2 border-theme-border rounded-2xl p-5 text-center transition-all duration-300 flex flex-col items-center justify-between min-h-[140px] hover:border-indigo-500/50">
-                    <span class="text-xs font-extrabold uppercase tracking-widest text-indigo-300">1. ENTRADA</span>
-                    <div id="displayEntrada" class="text-3xl font-mono font-extrabold text-white my-2">
-                        --:--
-                    </div>
-                    <button id="btnRegistrarEntrada" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white text-xs font-extrabold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-right-to-bracket"></i>
-                        <span>BATER ENTRADA</span>
-                    </button>
-                </div>
-
-                <!-- CARD 2: SAÍDA -->
-                <div id="boxSaida" class="bg-theme-bg/90 border-2 border-theme-border rounded-2xl p-5 text-center transition-all duration-300 flex flex-col items-center justify-between min-h-[140px] opacity-60">
-                    <span class="text-xs font-extrabold uppercase tracking-widest text-indigo-300">2. SAÍDA</span>
-                    <div id="displaySaida" class="text-3xl font-mono font-extrabold text-white my-2">
-                        --:--
-                    </div>
-                    <button id="btnRegistrarSaida" disabled class="w-full py-2.5 px-4 bg-slate-700 text-slate-400 text-xs font-extrabold rounded-xl shadow transition-all flex items-center justify-center gap-2 cursor-not-allowed">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>BATER SAÍDA</span>
-                    </button>
-                </div>
-
-            </div>
-
-            <!-- Painel Ajuste Manual & Observação -->
-            <div class="mt-8 pt-6 border-t border-theme-border/60 max-w-3xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-                <div class="w-full md:w-2/3">
-                    <label for="inputObs" class="block text-slate-400 font-semibold mb-1">Observação / Motivo (Opcional):</label>
-                    <input type="text" id="inputObs" placeholder="Ex: Projeto urgente, chamado de TI..." class="w-full px-3 py-2 bg-theme-bg border border-theme-border rounded-xl text-white outline-none focus:border-indigo-500 transition-all">
-                </div>
-                <div class="w-full md:w-1/3 flex justify-end">
-                    <button id="btnModalManual" class="w-full md:w-auto px-4 py-2 bg-theme-bg hover:bg-theme-cardHover border border-theme-border text-slate-300 font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-pen-to-square text-indigo-400"></i>
-                        <span>Lançamento Manual</span>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Histórico de Horas Extras -->
-        <section class="bg-theme-card border border-theme-border rounded-2xl p-6 shadow-xl">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-4 border-b border-theme-border/60">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-list-check text-indigo-400"></i>
-                    <h3 class="font-extrabold text-white text-base">Histórico de Hora Extra</h3>
-                </div>
-
-                <!-- Filtro por Mês -->
-                <div class="flex items-center space-x-2">
-                    <label for="filtroMes" class="text-xs text-slate-400">Mês:</label>
-                    <input type="month" id="filtroMes" class="px-3 py-1.5 bg-theme-bg border border-theme-border text-white rounded-xl text-xs font-mono outline-none focus:border-indigo-500">
-                    <button id="btnLimparFiltro" class="p-1.5 text-slate-400 hover:text-white transition-all" title="Limpar Filtro">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Tabela -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead>
-                        <tr class="border-b border-theme-border/60 text-indigo-300 font-extrabold uppercase tracking-wider text-[11px]">
-                            <th class="py-3 px-3">Data</th>
-                            <th class="py-3 px-3">Entrada</th>
-                            <th class="py-3 px-3">Saída</th>
-                            <th class="py-3 px-3">Duração HE</th>
-                            <th class="py-3 px-3">Observação</th>
-                            <th class="py-3 px-3 text-right">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelaHistorico" class="divide-y divide-theme-border/40 text-slate-300">
-                        <!-- Conteúdo alimentado via JS -->
-                    </tbody>
-                </table>
-
-                <!-- Estado Vazio -->
-                <div id="emptyState" class="hidden flex-col items-center justify-center py-10 text-center">
-                    <i class="fa-regular fa-clock text-3xl text-slate-600 mb-2"></i>
-                    <p class="text-slate-400 font-semibold text-sm">Nenhum registro encontrado</p>
-                    <p class="text-slate-500 text-xs mt-1">Bata a entrada e saída acima para começar a contabilizar.</p>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Modal Lançamento Manual -->
-    <div id="modalManual" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-theme-card border border-theme-border rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <div class="flex justify-between items-center pb-3 border-b border-theme-border/60 mb-4">
-                <h3 class="font-bold text-white text-sm">Lançar Hora Extra Manual</h3>
-                <button id="btnCloseModal" class="text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <form id="formManual" class="space-y-4 text-xs">
-                <div>
-                    <label for="manualData" class="block font-semibold text-slate-300 mb-1">Data *</label>
-                    <input type="date" id="manualData" required class="w-full px-3 py-2 bg-theme-bg border border-theme-border rounded-xl text-white outline-none focus:border-indigo-500">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label for="manualEntrada" class="block font-semibold text-slate-300 mb-1">Entrada *</label>
-                        <input type="time" id="manualEntrada" required class="w-full px-3 py-2 bg-theme-bg border border-theme-border rounded-xl text-white outline-none focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label for="manualSaida" class="block font-semibold text-slate-300 mb-1">Saída *</label>
-                        <input type="time" id="manualSaida" required class="w-full px-3 py-2 bg-theme-bg border border-theme-border rounded-xl text-white outline-none focus:border-indigo-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label for="manualObs" class="block font-semibold text-slate-300 mb-1">Observação</label>
-                    <input type="text" id="manualObs" placeholder="Motivo do ajuste" class="w-full px-3 py-2 bg-theme-bg border border-theme-border rounded-xl text-white outline-none focus:border-indigo-500">
-                </div>
-
-                <div class="pt-2 flex justify-end space-x-2">
-                    <button type="button" id="btnCancelModal" class="px-4 py-2 border border-theme-border rounded-xl text-slate-300 hover:bg-theme-cardHover">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg">Salvar HE</button>
-                </div>
             </form>
+
+            <!-- Form de Cadastro -->
+            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome Completo</label>
+                    <input type="text" id="regName" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Seu Nome">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">E-mail</label>
+                    <input type="email" id="regEmail" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="seu@email.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Senha</label>
+                    <input type="password" id="regPassword" required minlength="4" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Mínimo 4 caracteres">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg shadow-lg shadow-emerald-600/30 transition-all duration-200 mt-2">
+                    Cadastrar e Entrar
+                </button>
+            </form>
+
+            <!-- Mensagem de Erro / Sucesso -->
+            <div id="authAlert" class="hidden mt-4 p-3 rounded-lg text-xs text-center"></div>
         </div>
     </div>
 
+    <!-- SEÇÃO 2: PAINEL PRINCIPAL (SISTEMA DE HORA EXTRA) -->
+    <div id="appScreen" class="hidden min-h-screen flex flex-col justify-between">
+        <div>
+            <!-- Navbar Header -->
+            <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+                <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-indigo-600/20 text-indigo-400 rounded-lg border border-indigo-500/30">
+                            <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-white leading-tight">Controle de Hora Extra</h1>
+                            <p class="text-xs text-slate-400">Sistema de Ponto Direto</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="text-right hidden sm:block">
+                            <span id="userDisplayName" class="block text-sm font-semibold text-slate-200">Usuário</span>
+                            <span id="userDisplayEmail" class="block text-xs text-slate-400">email@exemplo.com</span>
+                        </div>
+                        <button onclick="handleLogout()" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-semibold rounded-lg transition-colors flex items-center gap-2">
+                            <i class="fa-solid fa-right-from-bracket"></i> Sair
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+                <!-- Relógio & Status -->
+                <div class="text-center space-y-1">
+                    <p id="currentDate" class="text-xs font-semibold uppercase tracking-widest text-slate-400">--/--/----</p>
+                    <div id="digitalClock" class="text-4xl sm:text-5xl font-mono font-bold text-white tracking-wider">00:00:00</div>
+                </div>
+
+                <!-- CARDS 1. ENTRADA e 2. SAÍDA -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Card 1: Entrada -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center shadow-xl hover:border-slate-700 transition-colors relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-indigo-500"></div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">1. ENTRADA</span>
+                        <div id="displayEntrada" class="text-4xl font-mono font-bold text-white my-4">--:--</div>
+                        <button id="btnEntrada" onclick="punchEntrada()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-play"></i> Bater Entrada
+                        </button>
+                    </div>
+
+                    <!-- Card 2: Saída -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center shadow-xl hover:border-slate-700 transition-colors relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">2. SAÍDA</span>
+                        <div id="displaySaida" class="text-4xl font-mono font-bold text-white my-4">--:--</div>
+                        <button id="btnSaida" onclick="punchSaida()" disabled class="w-full py-3 bg-slate-800 text-slate-500 font-semibold rounded-xl cursor-not-allowed transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-stop"></i> Bater Saída
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resumo & Totais -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center gap-4">
+                        <div class="p-3 bg-indigo-600/20 text-indigo-400 rounded-lg">
+                            <i class="fa-solid fa-hourglass-half text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold uppercase text-slate-400">Total do Mês Atual</span>
+                            <h3 id="totalMonth" class="text-2xl font-bold text-indigo-400">0h 00m</h3>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center gap-4">
+                        <div class="p-3 bg-emerald-600/20 text-emerald-400 rounded-lg">
+                            <i class="fa-solid fa-calculator text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold uppercase text-slate-400">Total Geral Acumulado</span>
+                            <h3 id="totalAllTime" class="text-2xl font-bold text-emerald-400">0h 00m</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela de Histórico -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                    <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between flex-wrap gap-4">
+                        <h3 class="font-bold text-white">Histórico de Horas Extras</h3>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs text-slate-400">Filtrar Mês:</label>
+                            <input type="month" id="monthFilter" onchange="renderHistory()" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1 text-xs text-slate-200">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-950/50 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                                    <th class="p-4">Data</th>
+                                    <th class="p-4">Entrada</th>
+                                    <th class="p-4">Saída</th>
+                                    <th class="p-4">Duração Extra</th>
+                                    <th class="p-4 text-right">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTable" class="divide-y divide-slate-800 text-sm">
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-900">
+            Sistema de Hora Extra • Salvo por Usuário
+        </footer>
+    </div>
+
+    <!-- Script da Aplicação -->
     <script>
-        /**
-         * LÓGICA DE CONTROLE DE HORA EXTRA (APENAS ENTRADA E SAÍDA)
-         */
+        // ESTADO GLOBAL
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let records = [];
+        let activeEntry = null;
 
-        const STORAGE_KEY = 'he_registros_simples_v1';
-        const STORAGE_ACTIVE = 'he_sessao_ativa_v1';
+        document.addEventListener('DOMContentLoaded', () => {
+            updateClock();
+            setInterval(updateClock, 1000);
+            setCurrentMonthFilter();
 
-        let registros = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        let sessaoAtiva = JSON.parse(localStorage.getItem(STORAGE_ACTIVE)) || null;
+            if (currentUser) {
+                showAppScreen();
+            } else {
+                showAuthScreen();
+            }
+        });
 
-        // DOM Elements
-        const digitalClock = document.getElementById('digitalClock');
-        const currentDate = document.getElementById('currentDate');
-        const cardTotalHE = document.getElementById('cardTotalHE');
-        const cardStatusText = document.getElementById('cardStatusText');
-        const statusIconBox = document.getElementById('statusIconBox');
-        const statusIcon = document.getElementById('statusIcon');
-        const labelHoraInicioAtiva = document.getElementById('labelHoraInicioAtiva');
-        const badgeMonthTotal = document.getElementById('badgeMonthTotal');
+        // TROCA DE TABS (LOGIN / CADASTRO)
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const tabLoginBtn = document.getElementById('tabLoginBtn');
+            const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+            hideAlert();
 
-        const displayEntrada = document.getElementById('displayEntrada');
-        const displaySaida = document.getElementById('displaySaida');
-        const btnRegistrarEntrada = document.getElementById('btnRegistrarEntrada');
-        const btnRegistrarSaida = document.getElementById('btnRegistrarSaida');
-        const boxEntrada = document.getElementById('boxEntrada');
-        const boxSaida = document.getElementById('boxSaida');
-        const inputObs = document.getElementById('inputObs');
-
-        const tabelaHistorico = document.getElementById('tabelaHistorico');
-        const emptyState = document.getElementById('emptyState');
-        const filtroMes = document.getElementById('filtroMes');
-        const btnLimparFiltro = document.getElementById('btnLimparFiltro');
-
-        const modalManual = document.getElementById('modalManual');
-        const btnModalManual = document.getElementById('btnModalManual');
-        const btnCloseModal = document.getElementById('btnCloseModal');
-        const btnCancelModal = document.getElementById('btnCancelModal');
-        const formManual = document.getElementById('formManual');
-
-        // Relógio
-        function atualizarRelogio() {
-            const agora = new Date();
-            digitalClock.textContent = agora.toLocaleTimeString('pt-BR');
-            currentDate.textContent = agora.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
-        }
-        setInterval(atualizarRelogio, 1000);
-        atualizarRelogio();
-
-        function getHojeISO() {
-            const agora = new Date();
-            return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                tabLoginBtn.className = "flex-1 py-2 text-center text-sm font-semibold border-b-2 border-indigo-500 text-indigo-400";
+                tabRegisterBtn.className = "flex-1 py-2 text-center text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200";
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                tabRegisterBtn.className = "flex-1 py-2 text-center text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400";
+                tabLoginBtn.className = "flex-1 py-2 text-center text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200";
+            }
         }
 
-        function getHoraAtualHHMM() {
-            const agora = new Date();
-            return `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
-        }
+        // CADASTRO
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const password = document.getElementById('regPassword').value;
 
-        function minutosParaHorasFormatado(totalMinutos) {
-            const h = Math.floor(totalMinutos / 60);
-            const m = totalMinutos % 60;
-            return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m`;
-        }
-
-        function calcularDuraçaoMinutos(entradaStr, saidaStr) {
-            const [hE, mE] = entradaStr.split(':').map(Number);
-            const [hS, mS] = saidaStr.split(':').map(Number);
-
-            const totalEntrada = hE * 60 + mE;
-            let totalSaida = hS * 60 + mS;
-
-            if (totalSaida < totalEntrada) {
-                totalSaida += 24 * 60; // Passou da meia noite
+            if (users.find(u => u.email === email)) {
+                showAlert('Este e-mail já está cadastrado!', 'error');
+                return;
             }
 
-            return totalSaida - totalEntrada;
+            const newUser = { name, email, password };
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+
+            currentUser = { name, email };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+            showAlert('Conta criada com sucesso!', 'success');
+            setTimeout(() => showAppScreen(), 800);
         }
 
-        // Bater Entrada
-        btnRegistrarEntrada.addEventListener('click', () => {
-            const horaAtual = getHoraAtualHHMM();
-            sessaoAtiva = {
-                data: getHojeISO(),
-                entrada: horaAtual,
-                observacao: inputObs.value.trim()
+        // LOGIN
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (!user) {
+                showAlert('E-mail ou senha incorretos.', 'error');
+                return;
+            }
+
+            currentUser = { name: user.name, email: user.email };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+            showAppScreen();
+        }
+
+        // LOGOUT
+        function handleLogout() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            showAuthScreen();
+        }
+
+        // CONTROLADORES DE TELA
+        function showAuthScreen() {
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('appScreen').classList.add('hidden');
+        }
+
+        function showAppScreen() {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+
+            document.getElementById('userDisplayName').textContent = currentUser.name;
+            document.getElementById('userDisplayEmail').textContent = currentUser.email;
+
+            loadUserData();
+            updateUI();
+        }
+
+        // CARREGAR DADOS DO USUÁRIO LOGADO
+        function loadUserData() {
+            const userKey = `records_${currentUser.email}`;
+            const activeKey = `active_${currentUser.email}`;
+
+            records = JSON.parse(localStorage.getItem(userKey)) || [];
+            activeEntry = JSON.parse(localStorage.getItem(activeKey)) || null;
+        }
+
+        function saveUserData() {
+            const userKey = `records_${currentUser.email}`;
+            const activeKey = `active_${currentUser.email}`;
+
+            localStorage.setItem(userKey, JSON.stringify(records));
+            if (activeEntry) {
+                localStorage.setItem(activeKey, JSON.stringify(activeEntry));
+            } else {
+                localStorage.removeItem(activeKey);
+            }
+        }
+
+        // BATER ENTRADA
+        function punchEntrada() {
+            const now = new Date();
+            activeEntry = {
+                startTime: now.toISOString(),
+                dateStr: now.toISOString().split('T')[0],
+                timeStartStr: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
             };
+            saveUserData();
+            updateUI();
+        }
 
-            localStorage.setItem(STORAGE_ACTIVE, JSON.stringify(sessaoAtiva));
-            inputObs.value = '';
-            atualizarInterface();
-        });
+        // BATER SAÍDA
+        function punchSaida() {
+            if (!activeEntry) return;
 
-        // Bater Saída
-        btnRegistrarSaida.addEventListener('click', () => {
-            if (!sessaoAtiva) return;
+            const now = new Date();
+            const startTime = new Date(activeEntry.startTime);
+            const diffMs = now - startTime;
+            const durationMinutes = Math.max(1, Math.floor(diffMs / (1000 * 60)));
 
-            const horaSaida = getHoraAtualHHMM();
-            const duracao = calcularDuraçaoMinutos(sessaoAtiva.entrada, horaSaida);
-
-            const novoRegistro = {
+            const newRecord = {
                 id: Date.now(),
-                data: sessaoAtiva.data,
-                entrada: sessaoAtiva.entrada,
-                saida: horaSaida,
-                duracaoMinutos: duracao,
-                observacao: inputObs.value.trim() || sessaoAtiva.observacao || 'Hora Extra em tempo real'
+                date: activeEntry.dateStr,
+                startTime: activeEntry.timeStartStr,
+                endTime: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                durationMinutes: durationMinutes
             };
 
-            registros.push(novoRegistro);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
+            records.push(newRecord);
+            activeEntry = null;
 
-            sessaoAtiva = null;
-            localStorage.removeItem(STORAGE_ACTIVE);
-            inputObs.value = '';
+            saveUserData();
+            updateUI();
+        }
 
-            atualizarInterface();
-        });
+        // ATUALIZAÇÃO DA INTERFACE
+        function updateUI() {
+            const displayEntrada = document.getElementById('displayEntrada');
+            const displaySaida = document.getElementById('displaySaida');
+            const btnEntrada = document.getElementById('btnEntrada');
+            const btnSaida = document.getElementById('btnSaida');
 
-        function atualizarInterface() {
-            // Painel da Sessão Ativa
-            if (sessaoAtiva) {
-                displayEntrada.textContent = sessaoAtiva.entrada;
+            if (activeEntry) {
+                displayEntrada.textContent = activeEntry.timeStartStr;
                 displaySaida.textContent = '--:--';
 
-                btnRegistrarEntrada.disabled = true;
-                btnRegistrarEntrada.className = 'w-full py-2.5 px-4 bg-slate-800 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed';
+                btnEntrada.disabled = true;
+                btnEntrada.className = 'w-full py-3 bg-slate-800 text-slate-500 font-semibold rounded-xl cursor-not-allowed flex items-center justify-center gap-2';
 
-                btnRegistrarSaida.disabled = false;
-                btnRegistrarSaida.className = 'w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white text-xs font-extrabold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer';
-
-                boxEntrada.className = 'bg-theme-bg border-2 border-indigo-500/80 rounded-2xl p-5 text-center transition-all duration-300 flex flex-col items-center justify-between min-h-[140px] shadow-lg shadow-indigo-950';
-                boxSaida.className = 'bg-theme-bg border-2 border-emerald-500/60 rounded-2xl p-5 text-center transition-all duration-300 flex flex-col items-center justify-between min-h-[140px] opacity-100 shadow-lg';
-
-                cardStatusText.textContent = 'Em Hora Extra';
-                cardStatusText.className = 'text-xl font-bold text-emerald-400 mt-1';
-                statusIconBox.className = 'p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl';
-                statusIcon.className = 'fa-solid fa-circle-play text-xl animate-pulse';
-                labelHoraInicioAtiva.textContent = sessaoAtiva.entrada;
+                btnSaida.disabled = false;
+                btnSaida.className = 'w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2';
             } else {
                 displayEntrada.textContent = '--:--';
                 displaySaida.textContent = '--:--';
 
-                btnRegistrarEntrada.disabled = false;
-                btnRegistrarEntrada.className = 'w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white text-xs font-extrabold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer';
+                btnEntrada.disabled = false;
+                btnEntrada.className = 'w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2';
 
-                btnRegistrarSaida.disabled = true;
-                btnRegistrarSaida.className = 'w-full py-2.5 px-4 bg-slate-800 text-slate-600 text-xs font-extrabold rounded-xl transition-all cursor-not-allowed';
-
-                boxEntrada.className = 'bg-theme-bg/90 border-2 border-theme-border rounded-2xl p-5 text-center transition-all duration-300 flex flex-col items-center justify-between min-h-[140px] hover:border-indigo-500/50';
-                boxSaida.className = 'bg-theme-bg/90 border-2 border-theme-border rounded-2xl p-5 text-center transition-all duration-300 flex flex-col items-center justify-between min-h-[140px] opacity-60';
-
-                cardStatusText.textContent = 'Fora de Hora Extra';
-                cardStatusText.className = 'text-xl font-bold text-slate-400 mt-1';
-                statusIconBox.className = 'p-3 bg-slate-800 border border-slate-700 text-slate-400 rounded-xl';
-                statusIcon.className = 'fa-solid fa-power-off text-xl';
-                labelHoraInicioAtiva.textContent = '--:--';
+                btnSaida.disabled = true;
+                btnSaida.className = 'w-full py-3 bg-slate-800 text-slate-500 font-semibold rounded-xl cursor-not-allowed flex items-center justify-center gap-2';
             }
 
-            renderizarTabela();
+            renderHistory();
+            calculateTotals();
         }
 
-        function renderizarTabela() {
-            const mesSelecionado = filtroMes.value;
-            tabelaHistorico.innerHTML = '';
+        // RELÓGIO DIGITAL
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('digitalClock').textContent = now.toLocaleTimeString('pt-BR');
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+        }
 
-            let lista = [...registros].sort((a, b) => b.id - a.id);
+        function setCurrentMonthFilter() {
+            const now = new Date();
+            const monthStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            document.getElementById('monthFilter').value = monthStr;
+        }
 
-            if (mesSelecionado) {
-                lista = lista.filter(r => r.data.startsWith(mesSelecionado));
+        // TOTAIS DE HORAS
+        function calculateTotals() {
+            const currentFilter = document.getElementById('monthFilter').value;
+            let monthMinutes = 0;
+            let totalMinutes = 0;
+
+            records.forEach(r => {
+                totalMinutes += r.durationMinutes;
+                if (r.date.startsWith(currentFilter)) {
+                    monthMinutes += r.durationMinutes;
+                }
+            });
+
+            document.getElementById('totalMonth').textContent = formatMinutes(monthMinutes);
+            document.getElementById('totalAllTime').textContent = formatMinutes(totalMinutes);
+        }
+
+        // RENDER HISTÓRICO
+        function renderHistory() {
+            const currentFilter = document.getElementById('monthFilter').value;
+            const tbody = document.getElementById('historyTable');
+            tbody.innerHTML = '';
+
+            const filtered = records
+                .filter(r => r.date.startsWith(currentFilter))
+                .sort((a, b) => b.id - a.id);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">Nenhum registro encontrado para este mês.</td></tr>`;
+                return;
             }
 
-            if (lista.length === 0) {
-                emptyState.classList.remove('hidden');
-                emptyState.classList.add('flex');
-            } else {
-                emptyState.classList.add('hidden');
-                emptyState.classList.remove('flex');
-            }
-
-            let totalMinutos = 0;
-
-            lista.forEach(reg => {
-                totalMinutos += reg.duracaoMinutos;
-                const [ano, mes, dia] = reg.data.split('-');
-
+            filtered.forEach(r => {
+                const [year, month, day] = r.date.split('-');
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-theme-cardHover transition-colors';
-
+                tr.className = "hover:bg-slate-800/50 transition-colors";
                 tr.innerHTML = `
-                    <td class="py-3.5 px-3 font-semibold text-white">${dia}/${mes}/${ano}</td>
-                    <td class="py-3.5 px-3 font-mono text-indigo-300">${reg.entrada}</td>
-                    <td class="py-3.5 px-3 font-mono text-indigo-300">${reg.saida}</td>
-                    <td class="py-3.5 px-3">
-                        <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-bold">
-                            +${minutosParaHorasFormatado(reg.duracaoMinutos)}
-                        </span>
-                    </td>
-                    <td class="py-3.5 px-3 text-slate-400 max-w-[180px] truncate">${reg.observacao || '-'}</td>
-                    <td class="py-3.5 px-3 text-right">
-                        <button onclick="excluirRegistro(${reg.id})" class="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all" title="Excluir">
-                            <i class="fa-solid fa-trash"></i>
+                    <td class="p-4 font-semibold text-slate-200">${day}/${month}/${year}</td>
+                    <td class="p-4 text-slate-300">${r.startTime}</td>
+                    <td class="p-4 text-slate-300">${r.endTime}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md font-bold text-xs">${formatMinutes(r.durationMinutes)}</span></td>
+                    <td class="p-4 text-right">
+                        <button onclick="deleteRecord(${r.id})" class="text-slate-500 hover:text-red-400 transition-colors">
+                            <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </td>
                 `;
-                tabelaHistorico.appendChild(tr);
+                tbody.appendChild(tr);
             });
-
-            // Atualiza Totais nos Cards
-            cardTotalHE.textContent = minutosParaHorasFormatado(totalMinutos);
-            badgeMonthTotal.textContent = `${lista.length} ${lista.length === 1 ? 'sessão' : 'sessões'}`;
         }
 
-        window.excluirRegistro = function(id) {
-            if (confirm('Deseja excluir esta hora extra?')) {
-                registros = registros.filter(r => r.id !== id);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
-                atualizarInterface();
+        function deleteRecord(id) {
+            if (confirm('Excluir este registro?')) {
+                records = records.filter(r => r.id !== id);
+                saveUserData();
+                updateUI();
             }
-        };
+        }
 
-        // Modal Lançamento Manual
-        btnModalManual.addEventListener('click', () => {
-            document.getElementById('manualData').value = getHojeISO();
-            modalManual.classList.remove('hidden');
-        });
+        function formatMinutes(totalMin) {
+            const hours = Math.floor(totalMin / 60);
+            const minutes = totalMin % 60;
+            return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
+        }
 
-        function fecharModal() { modalManual.classList.add('hidden'); }
-        btnCloseModal.addEventListener('click', fecharModal);
-        btnCancelModal.addEventListener('click', fecharModal);
+        function showAlert(msg, type) {
+            const alert = document.getElementById('authAlert');
+            alert.textContent = msg;
+            alert.className = type === 'error' 
+                ? 'mt-4 p-3 rounded-lg text-xs text-center bg-red-500/10 text-red-400 border border-red-500/20' 
+                : 'mt-4 p-3 rounded-lg text-xs text-center bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+            alert.classList.remove('hidden');
+        }
 
-        formManual.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const data = document.getElementById('manualData').value;
-            const entrada = document.getElementById('manualEntrada').value;
-            const saida = document.getElementById('manualSaida').value;
-            const obs = document.getElementById('manualObs').value.trim();
-
-            const duracao = calcularDuraçaoMinutos(entrada, saida);
-
-            registros.push({
-                id: Date.now(),
-                data,
-                entrada,
-                saida,
-                duracaoMinutos: duracao,
-                observacao: obs || 'Lançamento manual'
-            });
-
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
-            formManual.reset();
-            fecharModal();
-            atualizarInterface();
-        });
-
-        // Limpar Filtros
-        filtroMes.addEventListener('change', renderizarTabela);
-        btnLimparFiltro.addEventListener('click', () => {
-            filtroMes.value = '';
-            renderizarTabela();
-        });
-
-        // Limpar Tudo
-        document.getElementById('btnClearAll').addEventListener('click', () => {
-            if (confirm('Tem certeza que deseja apagar TODOS os registros de Hora Extra?')) {
-                localStorage.removeItem(STORAGE_KEY);
-                localStorage.removeItem(STORAGE_ACTIVE);
-                registros = [];
-                sessaoAtiva = null;
-                atualizarInterface();
-            }
-        });
-
-        // Exportar CSV
-        document.getElementById('btnExportCSV').addEventListener('click', () => {
-            if (registros.length === 0) return alert('Nenhum registro para exportar.');
-
-            let csv = 'Data;Entrada;Saida;Duracao_Minutos;Duracao_Formatada;Observacao\n';
-            registros.forEach(r => {
-                csv += `${r.data};${r.entrada};${r.saida};${r.duracaoMinutos};${minutosParaHorasFormatado(r.duracaoMinutos)};"${r.observacao || ''}"\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `horas_extras_${getHojeISO()}.csv`;
-            a.click();
-        });
-
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', () => {
-            const agora = new Date();
-            filtroMes.value = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
-            atualizarInterface();
-        });
+        function hideAlert() {
+            document.getElementById('authAlert').classList.add('hidden');
+        }
     </script>
 </body>
 </html>

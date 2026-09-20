@@ -174,9 +174,15 @@
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
                     <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between flex-wrap gap-4">
                         <h3 class="font-bold text-white">Histórico de Horas Extras</h3>
-                        <div class="flex items-center gap-2">
-                            <label class="text-xs text-slate-400">Filtrar Mês:</label>
-                            <input type="month" id="monthFilter" onchange="renderHistory()" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1 text-xs text-slate-200">
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-slate-400">Filtrar Mês:</label>
+                                <input type="month" id="monthFilter" onchange="renderHistory()" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <!-- Botão Exportar Excel / CSV -->
+                            <button onclick="exportCSV()" class="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-semibold rounded-lg transition-colors flex items-center gap-2">
+                                <i class="fa-solid fa-file-excel"></i> Exportar Excel (CSV)
+                            </button>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -475,6 +481,35 @@
             const hours = Math.floor(totalMin / 60);
             const minutes = totalMin % 60;
             return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
+        }
+
+        // EXPORTAR EXCEL (CSV)
+        function exportCSV() {
+            const currentFilter = document.getElementById('monthFilter').value;
+            const filteredRecords = records.filter(r => r.date.startsWith(currentFilter));
+
+            if (filteredRecords.length === 0) {
+                alert('Não há dados cadastrados para exportar neste mês.');
+                return;
+            }
+
+            // BOM para garantir caracteres em UTF-8 no Excel
+            let csvContent = "\uFEFFData;Entrada;Saida;Duracao_Minutos;Duracao_Formatada\n";
+            
+            filteredRecords.forEach(r => {
+                const [year, month, day] = r.date.split('-');
+                const formattedDate = `${day}/${month}/${year}`;
+                csvContent += `${formattedDate};${r.startTime};${r.endTime};${r.durationMinutes};${formatMinutes(r.durationMinutes)}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Horas_Extras_${currentUser.name.replace(/\s+/g, '_')}_${currentFilter}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function showAlert(msg, type) {
